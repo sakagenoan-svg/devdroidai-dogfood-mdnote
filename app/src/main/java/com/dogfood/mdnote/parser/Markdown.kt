@@ -14,6 +14,7 @@ sealed interface Block {
     data class Paragraph(val inlines: List<Inline>) : Block
     data class Bullet(val items: List<List<Inline>>) : Block
     data class CodeBlock(val text: String) : Block
+    data class Quote(val inlines: List<Inline>) : Block
 }
 
 /**
@@ -59,12 +60,24 @@ object Markdown {
                     blocks += Block.Bullet(items)
                 }
 
+                line.startsWith("> ") -> {
+                    val quoteLines = mutableListOf<String>()
+                    while (i < lines.size && lines[i].startsWith("> ")) {
+                        val content = lines[i].drop(2).trim()
+                        quoteLines += content
+                        i++
+                    }
+                    val quotedText = quoteLines.joinToString(" ")
+                    blocks += Block.Quote(parseInline(quotedText))
+                }
+
                 else -> {
                     val sb = StringBuilder()
                     while (i < lines.size && lines[i].isNotBlank() &&
                         !lines[i].startsWith("#") &&
                         !lines[i].startsWith("```") &&
-                        !lines[i].trimStart().startsWith("- ")
+                        !lines[i].trimStart().startsWith("- ") &&
+                        !lines[i].startsWith("> ")
                     ) {
                         if (sb.isNotEmpty()) sb.append(' ')
                         sb.append(lines[i].trim())

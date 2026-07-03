@@ -14,6 +14,7 @@ sealed interface Block {
     data class Paragraph(val inlines: List<Inline>) : Block
     data class Bullet(val items: List<List<Inline>>) : Block
     data class CodeBlock(val text: String) : Block
+    data class Blockquote(val inlines: List<Inline>) : Block
 }
 
 /**

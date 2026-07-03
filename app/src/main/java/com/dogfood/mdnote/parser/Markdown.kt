@@ -12,14 +12,15 @@ sealed interface Inline {
 sealed interface Block {
     data class Heading(val level: Int, val inlines: List<Inline>) : Block
     data class Paragraph(val inlines: List<Inline>) : Block
+    data class Blockquote(val inlines: List<Inline>) : Block
     data class Bullet(val items: List<List<Inline>>) : Block
     data class CodeBlock(val text: String) : Block
 }
 
 /**
  * A small, dependency-free Markdown subset parser supporting headings (#..######), bullet
- * lists (- ), fenced code (```), and inline bold (**), italic (*) and code (`). The inline
- * parser is recursive so emphasis can nest.
+ * lists (- ), fenced code (```), blockquotes (>), and inline bold (**), italic (*) and code (`).
+ * The inline parser is recursive so emphasis can nest.
  */
 object Markdown {
 
@@ -50,6 +51,17 @@ object Markdown {
                     i++
                 }
 
+                line.trimStart().startsWith(">") -> {
+                    val sb = StringBuilder()
+                    while (i < lines.size && lines[i].trimStart().startsWith(">")) {
+                        val content = lines[i].trimStart().removePrefix(">").trim()
+                        if (sb.isNotEmpty()) sb.append(' ')
+                        sb.append(content)
+                        i++
+                    }
+                    blocks += Block.Blockquote(parseInline(sb.toString()))
+                }
+
                 line.trimStart().startsWith("- ") -> {
                     val items = mutableListOf<List<Inline>>()
                     while (i < lines.size && lines[i].trimStart().startsWith("- ")) {
@@ -64,6 +76,7 @@ object Markdown {
                     while (i < lines.size && lines[i].isNotBlank() &&
                         !lines[i].startsWith("#") &&
                         !lines[i].startsWith("```") &&
+                        !lines[i].trimStart().startsWith(">") &&
                         !lines[i].trimStart().startsWith("- ")
                     ) {
                         if (sb.isNotEmpty()) sb.append(' ')

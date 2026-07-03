@@ -33,7 +33,7 @@ import com.dogfood.mdnote.parser.Markdown
 fun EditorScreen() {
     var source by remember {
         mutableStateOf(
-            "# Notes\n\nType **markdown** here.\n\n- supports *italic*\n- and `code`\n",
+            "# Notes\n\nType **markdown** here.\n\n- supports *italic*\n- and `code`\n\n> 引用 **太字** *斜体*\n> **bold** in quote\n",
         )
     }
     val blocks = remember(source) { Markdown.parse(source) }

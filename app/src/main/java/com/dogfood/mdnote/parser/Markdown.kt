@@ -14,11 +14,12 @@ sealed interface Block {
     data class Paragraph(val inlines: List<Inline>) : Block
     data class Bullet(val items: List<List<Inline>>) : Block
     data class CodeBlock(val text: String) : Block
+    data class Blockquote(val inlines: List<Inline>) : Block
 }
 
 /**
  * A small, dependency-free Markdown subset parser supporting headings (#..######), bullet
- * lists (- ), fenced code (```), and inline bold (**), italic (*) and code (`). The inline
+ * lists (- ), fenced code (```), blockquotes (> ), and inline bold (**), italic (*) and code (`). The inline
  * parser is recursive so emphasis can nest.
  */
 object Markdown {
@@ -43,6 +44,17 @@ object Markdown {
                     blocks += Block.CodeBlock(sb.toString().trimEnd('\n'))
                 }
 
+                line.trimStart().startsWith("> ") -> {
+                    val quoteLines = mutableListOf<String>()
+                    while (i < lines.size && lines[i].trimStart().startsWith("> ")) {
+                        val quotedLine = lines[i].trimStart().removePrefix("> ").trim()
+                        quoteLines += quotedLine
+                        i++
+                    }
+                    val quotedText = quoteLines.joinToString(" ")
+                    blocks += Block.Blockquote(parseInline(quotedText))
+                }
+
                 line.startsWith("#") -> {
                     val level = line.takeWhile { it == '#' }.length.coerceAtMost(6)
                     val content = line.drop(level).trim()
@@ -64,7 +76,8 @@ object Markdown {
                     while (i < lines.size && lines[i].isNotBlank() &&
                         !lines[i].startsWith("#") &&
                         !lines[i].startsWith("```") &&
-                        !lines[i].trimStart().startsWith("- ")
+                        !lines[i].trimStart().startsWith("- ") &&
+                        !lines[i].trimStart().startsWith("> ")
                     ) {
                         if (sb.isNotEmpty()) sb.append(' ')
                         sb.append(lines[i].trim())

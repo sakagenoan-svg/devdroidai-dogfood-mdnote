@@ -72,6 +72,12 @@ private fun BlockView(block: Block) {
 
         is Block.Paragraph -> Text(renderInlines(block.inlines))
 
+        is Block.Blockquote -> Text(
+            renderInlines(block.inlines),
+            modifier = Modifier.padding(start = 16.dp),
+            fontStyle = FontStyle.Italic,
+        )
+
         is Block.Bullet -> Column {
             for (item in block.items) {
                 Text(buildAnnotatedString {

@@ -86,6 +86,12 @@ private fun BlockView(block: Block) {
             fontFamily = FontFamily.Monospace,
             style = MaterialTheme.typography.bodySmall,
         )
+
+        is Block.Blockquote -> Text(
+            renderInlines(block.inlines),
+            modifier = Modifier.padding(start = 16.dp),
+            fontStyle = FontStyle.Italic,
+        )
     }
 }
 

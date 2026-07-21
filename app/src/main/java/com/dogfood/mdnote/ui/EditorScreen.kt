@@ -1,10 +1,13 @@
 package com.dogfood.mdnote.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -86,6 +89,25 @@ private fun BlockView(block: Block) {
             fontFamily = FontFamily.Monospace,
             style = MaterialTheme.typography.bodySmall,
         )
+
+        is Block.Blockquote -> Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            // Left border line
+            androidx.compose.foundation.layout.Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .padding(top = 4.dp, bottom = 4.dp)
+                    .background(MaterialTheme.colorScheme.outline)
+            )
+            // Blockquote content with indentation
+            Text(
+                renderInlines(block.inlines),
+                modifier = Modifier.padding(start = 4.dp),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
     }
 }
 
